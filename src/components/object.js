@@ -1,18 +1,22 @@
-import Point from './point.js';
+import {Point} from './things.js';
 
 class GameObject {
-	constructor () {
-		this.width = 1;
-		this.height = 1;
-		this.x = 0;
-		this.y = 0;
+	constructor() {
+		this.width = 20;
+		this.height = 20;
+		this.x = window.innerWidth / 2;
+		this.y = window.innerHeight / 2;
 		this.rotation = 0;
 		this.useImage = false;
 		this.image = null;
 		this.color = 'black';
 	}
 
-	draw (ctx) {
+	draw(ctx) {
+		if (!ctx) {
+			throw new Error('ctx is undefined');
+			return;
+		}
 		if (this.useImage) {
 			this.drawFromImage(ctx);
 		} else {
@@ -24,52 +28,58 @@ class GameObject {
 	 * @function drawFromImage
 	 * @param {CanvasRenderingContext2D} ctx
 	 */
-	drawFromImage (ctx) {
-		const center = new Point(this.x, this.y);
+	drawFromImage(ctx) {
+		const center = new Point(this.x + this.width / 2, this.y + this.height / 2);
 		ctx.save();
 		ctx.translate(center.x, center.y);
 		ctx.rotate(this.rotation);
 		ctx.drawImage(this.image, -this.width / 2, -this.height / 2, this.width, this.height);
+		ctx.restore();
 	}
 
 	/**
 	 * @function drawFromRect
 	 * @param {CanvasRenderingContext2D} ctx
 	 */
-	drawFromRect (ctx) {
-		const center = new Point(this.x, this.y);
+	drawFromRect(ctx, playerCenter) {
+		const center = new Point(this.x + this.width / 2, this.y + this.height / 2);
 		ctx.save();
 		ctx.translate(center.x, center.y);
 		ctx.rotate(this.rotation);
-		ctx.fillRect(-this.width / 2, - this.height / 2, this.width, this.height);
 		ctx.fillStyle = this.color;
+		ctx.fillRect(-this.width / 2, - this.height / 2, this.width, this.height);
 		ctx.restore();
 	}
 
-	loadImage (url, onload, onprogress, onerror) {
+	loadImage(url, onstart, onload, onprogress, onerror) {
 		const xhr = new XMLHttpRequest();
 		xhr.open('GET', url);
 		xhr.responseType = 'arraybuffer';
-		xhr.send(null);
 		xhr.addEventListener('progress', (e) => {
-			onprogress({loaded: e.loaded, total: e.lengthComputable ? e.total : e.loaded, computable: e.lengthComputable});
+			onprogress({ loaded: e.loaded, total: e.lengthComputable ? e.total : e.loaded, computable: e.lengthComputable });
 		});
+		xhr.addEventListener('loadstart', (e) => {
+			if (e.lengthComputable) {
+				onstart(e.total);
+			}
+		})
 		xhr.addEventListener('load', (e) => {
 			if (xhr.status === 200) {
 				// success!
-				var blob = new Blob([xhr.response]);
-				blob = blob.getBlob ('image/png');
-				var reader = new FileReader();
-				reader.addEventListener('load', (e) => {
-					const element = document.createElement('img');
-					element.src = e.target.result;
-					onload($('#images').appendChild(element));
-				});
+				var blob = new Blob([xhr.response], { type: 'image/png' });
+				const element = document.createElement('img');
+				element.src = URL.createObjectURL(blob);
+				element.addEventListener('load', () => onload($('#images').appendChild(element)));
 			}
 		});
 
-		xhr.addEventListener('error', onerror);
+		xhr.addEventListener('error', (e) => {
+			console.log('error loading file');
+			onerror(e);
+		});
+
+		xhr.send();
 	}
 }
 
-export default Object;
+export default GameObject;

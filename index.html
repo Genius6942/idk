@@ -6,11 +6,17 @@
 	<meta name="viewport" content="width=device-width">
 	<title>something</title>
 	<link href="./style.css" rel="stylesheet" type="text/css" />
+	<script>
+		window.$ = function $ (query) {
+			const thing = document.querySelectorAll(query);
+			return thing.length > 1 ? thing : thing[0];
+		}
+		</script>
 	<script type = 'module' src = './src/main.js'></script>
 </head>
 
 <body>
-	
+	<div id="images" style = 'display: none'></div>
 </body>
 
 </html>

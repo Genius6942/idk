@@ -1,0 +1,25 @@
+[
+	{
+		"x": 0,
+		"y": 250,
+		"width": 1000,
+		"height": 40,
+		"color": "white"
+	},
+
+	{
+		"x": 0,
+		"y": -100,
+		"width": 40,
+		"height": 390,
+		"color": "white"
+	},
+
+	{
+		"x": 1100,
+		"y": 0,
+		"width": 40,
+		"height": 400,
+		"color": "white"
+	}
+]
